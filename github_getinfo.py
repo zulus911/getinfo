@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from github import Github
+#from github import Github
+from github import GitHub
 from argparse import ArgumentParser
 
 
@@ -17,20 +18,25 @@ class GetInfo:
     def diff_auth(self):
         if self.Token != '':
             try:
-                return Github(self.Token)
+                print "2"
+                #return Github(self.Token)
+                return GitHub(access_token=self.Token)
             except:
                 print "bad token"
                 exit(2)
         else:
             try:
-                return Github(self.UserName, self.Password)
+                #return Github(self.UserName, self.Password)
+                return GitHub(username=self.UserName, password=self.Password)
             except:
                 print "Bad login or password"
                 exit(2)
 
     def get_username(self):
         g = self.diff_auth()
-        return g.get_user('github').get_repo('hubot').get_releases()
+        print "3"
+        #return g.get_user('zulus911').get_()repo('getinfo').get_releases()
+        return g.repos('github')('hubot').releases().get()
 
 
 
@@ -42,9 +48,14 @@ if __name__ == "__main__":
     parser_cli.add_argument("--token", action="store", dest="token")
     cli_parsed = parser_cli.parse_args()
     if cli_parsed.token != None:
+        print "1"
         rip = GetInfo(token=cli_parsed.token)
+        
         for i in rip.get_username():
-            print str(i)
+            print i.body
+            print i.author.login
+            print i.tag_name
+            print i.html_url
     elif cli_parsed.user != None and cli_parsed.passw != None:
         rip = GetInfo(user = cli_parsed.user, password = cli_parsed.passw)
         try:
@@ -54,7 +65,10 @@ if __name__ == "__main__":
         except:
             print ("Can not write to cache file. Only pass input not worked")
         for i in rip.get_username():
-            print str(i)
+            print i.body
+            print i.author.login
+            print i.tag_name
+            print i.html_url
     elif cli_parsed.passw != None and cli_parsed.user == None:
         try:
             f = open("/dev/shm/github_getinfo.cache", "r")
@@ -64,13 +78,12 @@ if __name__ == "__main__":
         user = f.read()
         f.close
         rip = GetInfo(user = user, password = cli_parsed.passw)
-        for i in rip.get_username():
-            print str(i.tag_name)
-            print str(i.url)
-            print str(i.author._rawData['login'])
-            print str(i.title)
-            print str(i.body)
 
+        for i in rip.get_username():
+            print i.body
+            print i.author.login
+            print i.tag_name
+            print i.html_url
     else:
         print "Please use --hepl for seing how use this script"
         exit(1)
